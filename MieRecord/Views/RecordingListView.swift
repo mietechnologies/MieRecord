@@ -7,6 +7,7 @@ struct RecordingListView: View {
     @State private var isRecording = false
     @State private var isShowingAcknowledgements = false
     @State private var isShowingPeople = false
+    private let launchRequest = RecordingLaunchRequest.shared
 
     var body: some View {
         NavigationStack {
@@ -59,6 +60,9 @@ struct RecordingListView: View {
             RecordingView()
                 .environment(dependencies)
         }
+        .onChange(of: launchRequest.isPending, initial: true) { _, pending in
+            if pending { Task { await startRecordingFromLaunchRequest() } }
+        }
         .onChange(of: isRecording) { _, presented in
             if !presented {
                 Task { await viewModel?.load() }
@@ -67,6 +71,20 @@ struct RecordingListView: View {
         .onChange(of: dependencies.processingJobs.revision) { _, _ in
             Task { await viewModel?.load() }
         }
+    }
+
+    /// Starts a recording asked for by the Action Button or a shortcut. Does
+    /// nothing if one is already on screen.
+    private func startRecordingFromLaunchRequest() async {
+        guard launchRequest.consume(), !isRecording else { return }
+        // A full-screen cover cannot be presented over an open sheet, so close
+        // any sheet first and give it time to finish dismissing.
+        if isShowingAcknowledgements || isShowingPeople {
+            isShowingAcknowledgements = false
+            isShowingPeople = false
+            try? await Task.sleep(for: .milliseconds(500))
+        }
+        isRecording = true
     }
 
     @ViewBuilder

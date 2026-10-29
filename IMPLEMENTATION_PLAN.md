@@ -241,6 +241,11 @@ interruption, failure)           → TranscriptionEvent (volatile | finalized)
 - [ ] Offline (airplane mode) acceptance run; background task scheduling for processing
 - [ ] Accessibility pass; schema migration plan
 
+## Action Button and Shortcuts (2026-10-29)
+
+- [x] `StartRecordingIntent` (App Intents, `openAppWhenRun`) plus `MieRecordShortcuts`, so "Start Recording" appears in Shortcuts, Siri, and Settings > Action Button > Shortcut. The intent sets `RecordingLaunchRequest.shared`; `RecordingListView` consumes it and presents the recording cover, closing the Acknowledgements/People sheets first. A request while a recording is already on screen is ignored.
+- Known limitations: not yet built or run on a device (authored without Xcode). The device must be unlocked to open the app. Capture starts only after the microphone prompt on first use. There is no unit test for the hand-off because the app target has no unit-test bundle; verify by hand on an iPhone with an Action Button.
+
 ## Milestone 5 — Integration ecosystem (post-MVP)
 
 - [ ] Public export API; MCP strategy (macOS companion or user-initiated export). No always-on iPhone server.
