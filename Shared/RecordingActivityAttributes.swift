@@ -9,7 +9,7 @@ import Foundation
 /// Data shown by the recording Live Activity on the lock screen and in the
 /// Dynamic Island.
 nonisolated struct RecordingActivityAttributes: ActivityAttributes {
-    nonisolated struct ContentState: Codable, Hashable {
+    nonisolated struct ContentState: Codable, Hashable, Sendable {
         /// When the running clock started, already adjusted for time recorded
         /// before the last resume, so the system can render a live timer
         /// without the app waking up every second.
