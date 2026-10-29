@@ -246,6 +246,14 @@ interruption, failure)           → TranscriptionEvent (volatile | finalized)
 - [x] `StartRecordingIntent` (App Intents, `openAppWhenRun`) plus `MieRecordShortcuts`, so "Start Recording" appears in Shortcuts, Siri, and Settings > Action Button > Shortcut. The intent sets `RecordingLaunchRequest.shared`; `RecordingListView` consumes it and presents the recording cover, closing the Acknowledgements/People sheets first. A request while a recording is already on screen is ignored.
 - Known limitations: not yet built or run on a device (authored without Xcode). The device must be unlocked to open the app. Capture starts only after the microphone prompt on first use. There is no unit test for the hand-off because the app target has no unit-test bundle; verify by hand on an iPhone with an Action Button.
 
+## Lock screen Live Activity (2026-10-29)
+
+- [x] New `MieRecordLiveActivity` widget extension (embedded in the app; bundle ID `com.mietech.MieRecord.LiveActivity`) showing a recording on the lock screen and in the Dynamic Island: status icon, a system-driven `m:ss` timer (no per-second updates from the app), and a Stop button.
+- [x] `Shared/RecordingActivityAttributes.swift` is compiled into both targets: the activity's content state and `StopRecordingIntent` (a `LiveActivityIntent`, so it runs in the app process). The intent posts `.stopRecordingRequested`; `RecordingView` observes it and stops the session through the normal path.
+- [x] `RecordingViewModel` starts the activity on `.recording`, freezes it as "Paused" on `.interrupted`, and ends it on stop or failure. Activity calls are best-effort and never affect capture. Activities left by a crashed process are ended at the next launch (snapshotted at launch so a fresh recording's activity is never touched).
+- [x] `NSSupportsLiveActivities` added to `Config/Info.plist`; SwiftLint now covers `Shared` and `MieRecordLiveActivity`.
+- Known limitations: authored without Xcode, so the extension target in `project.pbxproj` was written by hand and its first build is on CI; not yet seen on a device. Tapping Stop while the app process is gone does nothing (a recording keeps the app alive via the audio background mode). If the user disables Live Activities, recording is unaffected and nothing is shown. No unit tests (the app target has no unit-test bundle).
+
 ## Milestone 5 — Integration ecosystem (post-MVP)
 
 - [ ] Public export API; MCP strategy (macOS companion or user-initiated export). No always-on iPhone server.

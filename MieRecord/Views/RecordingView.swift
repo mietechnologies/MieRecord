@@ -34,6 +34,10 @@ struct RecordingView: View {
             self.viewModel = viewModel
             await viewModel.start()
         }
+        // The Stop button on the lock screen Live Activity.
+        .onReceive(NotificationCenter.default.publisher(for: .stopRecordingRequested)) { _ in
+            Task { await viewModel?.stop() }
+        }
     }
 
     @ViewBuilder

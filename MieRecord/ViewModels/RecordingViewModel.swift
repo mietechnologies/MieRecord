@@ -35,6 +35,7 @@ final class RecordingViewModel {
     private let dependencies: AppDependencies
     private var session: RecordingSession?
     private var eventTask: Task<Void, Never>?
+    private let liveActivity = RecordingLiveActivityController()
 
     init(dependencies: AppDependencies) {
         self.dependencies = dependencies
@@ -66,6 +67,7 @@ final class RecordingViewModel {
     func stop() async {
         guard let session, phase.isActive || isFailedButRecording else { return }
         phase = .stopping
+        liveActivity.end()
         do {
             let recording = try await session.stop()
             phase = .finished(recording)
@@ -89,11 +91,19 @@ final class RecordingViewModel {
         case let .state(state):
             switch state {
             case .idle, .starting: break
-            case .recording: phase = .recording
-            case .interrupted: phase = .interrupted
-            case .stopping: phase = .stopping
+            case .recording:
+                phase = .recording
+                liveActivity.show(elapsed: elapsed, isPaused: false)
+            case .interrupted:
+                phase = .interrupted
+                liveActivity.show(elapsed: elapsed, isPaused: true)
+            case .stopping:
+                phase = .stopping
+                liveActivity.end()
             case .finished: break // `stop()` sets `.finished(recording)`.
-            case let .failed(reason): phase = .failed(reason)
+            case let .failed(reason):
+                phase = .failed(reason)
+                liveActivity.end()
             }
         case let .elapsed(seconds):
             elapsed = seconds

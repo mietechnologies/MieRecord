@@ -1,3 +1,4 @@
+import ActivityKit
 import ConversationAudio
 import ConversationCore
 import ConversationDiarization
@@ -22,6 +23,7 @@ final class AppDependencies {
     /// Non-nil when persistent storage could not be opened; the app then runs
     /// on an in-memory store so recording still works for the session.
     let startupError: String?
+    private let staleLiveActivities = RecordingLiveActivityController.runningActivities()
 
     init(
         repository: any RecordingRepository,
@@ -119,6 +121,7 @@ final class AppDependencies {
 
     /// Marks recordings orphaned by a previous crash as interrupted.
     func recoverInterruptedRecordings() async {
+        await RecordingLiveActivityController.end(staleLiveActivities)
         _ = try? await RecordingRecovery.repairInterruptedRecordings(repository: repository, audioFileStore: audioFileStore)
         _ = try? await RecordingRecovery.repairInterruptedProcessing(repository: repository)
     }

@@ -5,6 +5,8 @@
 included:
   - MieRecord
   - MieRecordUITests
+  - MieRecordLiveActivity
+  - Shared
   - ConversationKit/Sources
   - ConversationKit/Tests
 
